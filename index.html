@@ -37,7 +37,7 @@
         <p class="hero-tag">Anonymous submission · Under review</p>
         <img class="logo" src="assets/logo.png" width="1015" height="559" alt="LookAnything">
         <h1>A Generalist Foundation Model<br> for Gaze Target Detection</h1>
-        <p class="lede">LookAnything unifies gaze localization, description, and reasoning in one language-conditioned model. Learnable gaze-prior queries absorb scene depth, head grounding, and target geometry, so inference does not need head crops or depth maps.</p>
+        <p class="lede">LookAnything unifies diverse gaze-centric tasks within a single multimodal framework. By internalizing gaze priors via large-scale cross-domain learning, the framework bypasses explicit auxiliary inputs, enabling flexible adaptation across various scenarios, task settings, and output formats.</p>
         <div class="hero-actions">
           <a class="btn primary" href="#reel">Watch the reel</a>
           <a class="btn" href="#results">View results</a>
@@ -66,18 +66,18 @@
       <div class="container">
         <div class="section-head">
           <p class="eyebrow">01 / Overview</p>
-          <h2>One model for where, what, and whether a look is answerable.</h2>
+          <h2>Unifying diverse gaze-centric tasks.</h2>
           <p>Existing methods rely on auxiliary inputs like head crops or depth maps, and are confined to isolated target detection with heatmap outputs. Benefiting from large-scale multi-task and cross-domain training, LookAnything flexibly adapts to various settings, generating diverse outputs (points, boxes, heatmaps, and language) and supporting broad gaze-centric localization, description, and reasoning.</p>
         </div>
         <div class="two">
           <article class="card problem">
             <p class="index">The limitation</p>
-            <h3>Custom stacks, coarse outputs.</h3>
+            <h3>Bypassing external explicit inputs.</h3>
             <p>Head crops and depth maps add cascading error and extra runtime. A heatmap alone has no instance-level meaning, so the same model cannot describe the target, find who is looking, or refuse a bad question.</p>
           </article>
           <article class="card idea">
             <p class="index">The approach</p>
-            <h3>Priors in the latent space.</h3>
+            <h3>Gaze priors in the latent space.</h3>
             <p>We introduce a set of learnable gaze-prior queries that internalize scene depth, source-head grounding, and target spatial geometry directly into the latent space, which promotes intrinsic gaze-aware representation learning. The language head then reads those representations and emits a point, a box, a heatmap, or text.</p>
           </article>
         </div>
@@ -107,19 +107,19 @@
         </figure>
         <div class="three" style="margin-top: 18px;">
           <article class="card">
-            <p class="index">Depth</p>
-            <h3>Scene structure</h3>
-            <p>Depth queries reconstruct relative monocular depth with a lightweight decoder. The loss is scale-invariant, so the model keeps layout rather than a metric scale.</p>
+            <p class="index">Depth Queries</p>
+            <h3>Relative monocular depth</h3>
+            <p>Depth queries reconstruct relative monocular depth with a lightweight decoder. The loss is scale-invariant, allowing the model to focus on layout geometry.</p>
           </article>
           <article class="card">
-            <p class="index">Head</p>
-            <h3>Source grounding</h3>
-            <p>Head queries predict a binary mask of the looking person. That mask is the spatial anchor for later localization and for questions about who is looking.</p>
+            <p class="index">Head Queries</p>
+            <h3>Source head grounding</h3>
+            <p>Head queries predict a binary mask of the looking person, serving as the spatial anchor for gaze localization.</p>
           </article>
           <article class="card">
-            <p class="index">Target</p>
-            <h3>Where the look lands</h3>
-            <p>Gaze queries predict a heatmap, a normalized point, and a box. The heatmap uses the visual tokens. The point and box heads regress coordinates directly.</p>
+            <p class="index">Gaze Queries</p>
+            <h3>Target spatial geometry</h3>
+            <p>Gaze queries predict a spatial heatmap, a normalized point, and a bounding box, enabling diverse localization output formats.</p>
           </article>
         </div>
         <div class="split">
@@ -155,28 +155,28 @@
         <div class="dims">
           <article>
             <p class="task-names">GTL · GTD</p>
-            <h3>Target</h3>
-            <p>Given a person, predict a point, a box, or a description of what they look at. Training also includes a box-referred point task.</p>
+            <h3>Target detection & description</h3>
+            <p>Given a source person, detect the gaze target (point or bounding box) or describe the attended object.</p>
           </article>
           <article>
             <p class="task-names">GSL · GSD</p>
-            <h3>Source</h3>
-            <p>Given a target, find every observer’s head box, or describe the people who are looking at it.</p>
+            <h3>Source detection & description</h3>
+            <p>Given a target, detect the bounding box of the source person looking at it, or describe the person.</p>
           </article>
           <article>
             <p class="task-names">GDO · GDR</p>
-            <h3>Space</h3>
-            <p>Compare whether the head is closer or farther than the target, and classify gaze into four camera-relative directions.</p>
+            <h3>Spatial reasoning</h3>
+            <p>Reason about the spatial relationship, including 3D relative distance comparison (farther or closer) and 2D relative direction classification.</p>
           </article>
           <article>
             <p class="task-names">GCD</p>
-            <h3>Contact</h3>
-            <p>Decide whether a specified person is looking at the camera. This is the social signal an embodied agent needs first.</p>
+            <h3>Contact detection</h3>
+            <p>Determine whether the source person is making direct eye contact with the camera (mutual gaze).</p>
           </article>
           <article>
             <p class="task-names">ARR · PV</p>
-            <h3>Answerability</h3>
-            <p>Refuse a referring expression that matches more than one entity, or a target that is outside the frame.</p>
+            <h3>Answerability reasoning</h3>
+            <p>Identify unanswerable queries, such as ambiguous referring expressions or out-of-frame gaze targets.</p>
           </article>
         </div>
 
@@ -188,10 +188,10 @@
           <figcaption>Native train and test splits are kept, so benchmark images do not leak into the corpus. HoliGaze-Bench is checked instance by instance. The automatic drafts were edited on 0.70% of items.</figcaption>
         </figure>
         <div class="steps">
-          <article><strong>1. Collect</strong><p>Eight source datasets, from static photos to video and retail scenes, are mapped into one schema.</p></article>
-          <article><strong>2. Complete</strong><p>SAM3 fills head masks, Depth Anything v3 fills depth, and Qwen3-VL writes referring expressions.</p></article>
-          <article><strong>3. Ask</strong><p>Templates build open and multiple-choice questions. Distractors come from entity expansion, attribute edits, and box permutation.</p></article>
-          <article><strong>4. Check</strong><p>The 8K benchmark is reviewed by people for description accuracy, unique references, distractors, and depth polarity.</p></article>
+          <article><strong>1. Collect</strong><p>Annotations from eight academic gaze datasets are standardized into a unified schema.</p></article>
+          <article><strong>2. Complete</strong><p>Dense labels are automatically augmented using state-of-the-art vision models like SAM and Depth Anything.</p></article>
+          <article><strong>3. Ask</strong><p>Canonical Q&amp;A generation templates produce instruction-response pairs covering both open-ended and multiple-choice formats.</p></article>
+          <article><strong>4. Check</strong><p>The 8K benchmark split is rigorously reviewed and verified by human annotators.</p></article>
         </div>
         <div class="metric-row">
           <div><b>311K</b><span>Q&amp;A pairs</span></div>
@@ -238,7 +238,7 @@
       <div class="container-wide">
         <div class="section-head">
           <p class="eyebrow">04 / Results</p>
-          <h2>Ahead of generalist VLMs, level with specialists.</h2>
+          <h2>Exceeding VLMs in breadth, matching specialists in precision.</h2>
           <p>HoliGaze-Bench tests localization, description, spatial reasoning, social contact, and refusal. To verify that task unification does not compromise conventional gaze target detection, we also evaluate LookAnything on 5 official test splits of specialist benchmarks.</p>
         </div>
 
@@ -259,7 +259,7 @@
             <tbody id="leaderboard-body"></tbody>
           </table>
         </div>
-        <p class="table-notes"><strong>HoliGaze-Bench.</strong> Open-source and closed-source models are evaluated zero-shot. LookAnything is the 2B model trained on HoliGaze-Corpus. It is best on every column. The strongest other model in a column is underlined. Lower is better only for GTL point L₂. GTD and GSD report multiple-choice accuracy or F1 together with open-ended ROUGE-L and BLEU-4. Click a metric to sort.</p>
+        <p class="table-notes"><strong>HoliGaze-Bench.</strong> We compare LookAnything with leading closed-source and open-source models, including generalist and embodied models. LookAnything is the 2B model trained on HoliGaze-Corpus. It is best on every column. The strongest other model in a column is underlined. Lower is better only for GTL point L₂. GTD and GSD report multiple-choice accuracy or F1 together with open-ended ROUGE-L and BLEU-4. Click a metric to sort.</p>
 
         <div class="findings">
           <article>
@@ -272,7 +272,7 @@
           </article>
           <article>
             <h3>Broad gains at a compact scale.</h3>
-            <p>Compared to its Qwen3-VL-2B backbone, LookAnything reduces GTL-T2P L₂ from 0.387 to 0.094. Even 27B–38B generalists fall far short of its localization averages, showing the gains are not from scale.</p>
+            <p>Compared to its Qwen3-VL-2B backbone, LookAnything reduces GTL-T2P L₂ from 0.387 to 0.094. Even 27B–38B generalists fall far short of its localization averages, showing the gains are not from scale but from large-scale multi-task training and gaze-aware representation learning.</p>
           </article>
         </div>
 
@@ -382,8 +382,8 @@
           <h3 class="block-title">Output format</h3>
           <p>The question decides the output. The same scene family can be answered with a point, a box, a heatmap, or a selection among described items.</p>
           <div class="tabs" role="tablist" aria-label="Output format">
-            <button type="button" role="tab" aria-selected="true" data-src="assets/videos/point.mp4" data-poster="assets/posters/point.jpg" data-caption="A point and a ray mark the gaze target while the head mask stays on the source.">
-              <span class="kicker">Output 01</span><strong>Point</strong><small>A 2D gaze point on the attended place.</small>
+            <button type="button" role="tab" aria-selected="true" data-src="assets/videos/point.mp4" data-poster="assets/posters/point.jpg" data-caption="A point and a ray mark the gaze target while the head mask stays on the source person.">
+              <span class="kicker">Output 01</span><strong>Point</strong><small>A 2D normalized gaze point on the attended place.</small>
             </button>
             <button type="button" role="tab" aria-selected="false" tabindex="-1" data-src="assets/videos/box.mp4" data-poster="assets/posters/box.jpg" data-caption="The attended object is closed in a box, which is the form a downstream detector or planner can use.">
               <span class="kicker">Output 02</span><strong>Box</strong><small>A bounding box around the attended object.</small>
