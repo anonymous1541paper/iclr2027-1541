@@ -67,7 +67,7 @@
         <div class="section-head">
           <p class="eyebrow">01 / Overview</p>
           <h2>One model for where, what, and whether a look is answerable.</h2>
-          <p>Specialist gaze followers are usually trained in one domain, depend on cropped heads or depth, and stop at a heatmap. LookAnything is trained across domains and tasks, and answers in the form the question asks for.</p>
+          <p>Existing methods rely on auxiliary inputs like head crops or depth maps, and are confined to isolated target detection with heatmap outputs. Benefiting from large-scale multi-task and cross-domain training, LookAnything flexibly adapts to various settings, generating diverse outputs (points, boxes, heatmaps, and language) and supporting broad gaze-centric localization, description, and reasoning.</p>
         </div>
         <div class="two">
           <article class="card problem">
@@ -78,7 +78,7 @@
           <article class="card idea">
             <p class="index">The approach</p>
             <h3>Priors in the latent space.</h3>
-            <p>Gaze-prior queries learn depth, source-head grounding, and target geometry during training. At inference the language head reads those representations and emits a point, a box, a heatmap, or text.</p>
+            <p>We introduce a set of learnable gaze-prior queries that internalize scene depth, source-head grounding, and target spatial geometry directly into the latent space, which promotes intrinsic gaze-aware representation learning. The language head then reads those representations and emits a point, a box, a heatmap, or text.</p>
           </article>
         </div>
         <figure class="paper-figure">
@@ -95,8 +95,8 @@
       <div class="container">
         <div class="section-head">
           <p class="eyebrow">02 / Model</p>
-          <h2>Gaze-prior queries, then one answer stream.</h2>
-          <p>An image and an instruction are encoded, three groups of learnable queries are appended, and a language backbone turns them into a single token sequence. Auxiliary decoders supervise the queries and are skipped at inference.</p>
+          <h2>Instruction-conditioned autoregressive generation.</h2>
+          <p>LookAnything appends learnable gaze-prior queries to multimodal tokens to learn gaze-aware representations via auxiliary geometric supervision. The language head then autoregressively decodes the answer in a unified output space. The auxiliary branches can be skipped during inference.</p>
         </div>
         <figure>
           <button class="figure-btn" type="button" data-zoom="assets/figs/model.webp">
@@ -125,8 +125,8 @@
         <div class="split">
           <div>
             <p class="eyebrow">Block-wise attention</p>
-            <h3 style="font-size: 1.45rem; letter-spacing: -0.03em; margin: 8px 0 10px;">Keep the three priors from rewriting each other.</h3>
-            <p>If depth, head, and gaze queries could freely attend across groups, a dense depth map or a head contour could shortcut the target representation. Each group attends to the image, the question, and itself. Answer tokens attend to all three, so the language head still sees the full gaze context.</p>
+            <h3 style="font-size: 1.45rem; letter-spacing: -0.03em; margin: 8px 0 10px;">Disentangle queries into specialized groups.</h3>
+            <p>Forcing a single set of tokens to capture disparate physical and geometric properties causes feature entanglement. By explicitly disentangling the queries into specialized groups (each attending only to the image, the question, and itself), LookAnything maintains clean, domain-specific representations.</p>
           </div>
           <figure class="attention-card">
             <button class="figure-btn" type="button" data-zoom="assets/figs/attention.webp" style="padding: 8px; box-shadow: none;">
@@ -142,8 +142,8 @@
       <div class="container">
         <div class="section-head">
           <p class="eyebrow">03 / HoliGaze</p>
-          <h2>A corpus and a benchmark for holistic gaze.</h2>
-          <p>Existing gaze datasets each cover one slice of the problem. HoliGaze standardizes eight of them into 311K pairs: 303K for training and 8K human-checked questions over 6,143 images.</p>
+          <h2>A comprehensive resource for holistic gaze.</h2>
+          <p>HoliGaze standardizes eight existing gaze datasets into a single schema, comprising 311K Q&amp;A samples across 9 distinct tasks: 303K for training and an 8K human-checked benchmark over 6,143 images.</p>
         </div>
         <figure>
           <button class="figure-btn" type="button" data-zoom="assets/figs/taxonomy.webp">
@@ -239,7 +239,7 @@
         <div class="section-head">
           <p class="eyebrow">04 / Results</p>
           <h2>Ahead of generalist VLMs, level with specialists.</h2>
-          <p>HoliGaze-Bench tests localization, description, spatial reasoning, social contact, and refusal. Five conventional benchmarks test whether that breadth costs ordinary gaze-target accuracy.</p>
+          <p>HoliGaze-Bench tests localization, description, spatial reasoning, social contact, and refusal. To verify that task unification does not compromise conventional gaze target detection, we also evaluate LookAnything on 5 official test splits of specialist benchmarks.</p>
         </div>
 
         <div class="controls">
@@ -263,16 +263,16 @@
 
         <div class="findings">
           <article>
-            <h3>Grounding is the gap.</h3>
-            <p>Large closed models are strong on descriptive multiple choice and still weak at placing a point or a box. Language skill does not by itself produce gaze-conditioned coordinates.</p>
+            <h3>Geometric grounding is the primary gap.</h3>
+            <p>While closed-source models excel on descriptive MCQs, most struggle on localization. Broad language and reasoning capability therefore does not intrinsically yield precise gaze-conditioned grounding.</p>
           </article>
           <article>
-            <h3>Embodied pretraining does not transfer.</h3>
-            <p>Models trained for action and spatial control do fine on contact or depth questions, and remain far behind on point and box localization.</p>
+            <h3>Embodied pretraining does not automatically transfer.</h3>
+            <p>Embodied models perform adequately on contact or depth questions, but remain weak on point and box localization, indicating that generic spatial or action-centric supervision cannot substitute for gaze-specific priors.</p>
           </article>
           <article>
-            <h3>The gain is not from scale.</h3>
-            <p>Against its Qwen3-VL-2B backbone, point L₂ falls from 0.387 to 0.096. Models at 27B–38B stay below the 2B LookAnything result.</p>
+            <h3>Broad gains at a compact scale.</h3>
+            <p>Compared to its Qwen3-VL-2B backbone, LookAnything reduces GTL-T2P L₂ from 0.387 to 0.094. Even 27B–38B generalists fall far short of its localization averages, showing the gains are not from scale.</p>
           </article>
         </div>
 
@@ -285,7 +285,7 @@
         </figure>
 
         <h3 class="block-title">Five conventional gaze-target benchmarks</h3>
-        <p>Official test splits of GazeFollow, VideoAttentionTarget, ChildPlay, GazeHOI, and GOO-Real. LookAnything is compared with specialist detectors, not prompted as a generic VLM. Average L₂ is 0.112 and average AUC is 0.939, both best in this table.</p>
+        <p>Official test splits of GazeFollow, VideoAttentionTarget, ChildPlay, GazeHOI, and GOO-Real. LookAnything achieves the best overall performance with an average L₂ of 0.109 and average AUC of 0.942, matching or exceeding dedicated specialists on core localization.</p>
         <div class="table-scroll" style="margin-top: 16px;">
           <table class="native">
             <thead>
@@ -321,7 +321,7 @@
               <tr><td>Gaze-LLE (ViT-B)</td><td>0.132</td><td class="second">0.930</td><td>0.105</td><td>0.932</td><td>0.104</td><td class="second">0.045</td><td class="second">0.956</td><td>0.115</td><td>0.945</td><td>0.162</td><td>0.906</td><td>0.705</td><td>0.175</td><td>0.909</td></tr>
               <tr><td>Gaze-LLE (ViT-L)</td><td class="second">0.127</td><td>0.929</td><td class="best">0.100</td><td class="second">0.937</td><td class="second">0.098</td><td class="best">0.041</td><td class="best">0.958</td><td class="second">0.102</td><td class="second">0.950</td><td class="second">0.160</td><td class="second">0.907</td><td>0.710</td><td>0.173</td><td>0.915</td></tr>
               <tr><td>GazeAnywhere</td><td>0.183</td><td>0.897</td><td>0.236</td><td>0.845</td><td>0.179</td><td>0.115</td><td>0.923</td><td>0.139</td><td>0.916</td><td>0.196</td><td>0.885</td><td>0.625</td><td class="second">0.165</td><td class="second">0.918</td></tr>
-              <tr class="ours"><td>LookAnything</td><td class="best">0.112</td><td class="best">0.939</td><td class="best">0.100</td><td class="best">0.940</td><td class="best">0.094</td><td>0.052</td><td>0.943</td><td class="best">0.096</td><td class="best">0.953</td><td class="best">0.132</td><td class="best">0.939</td><td class="best">0.759</td><td class="best">0.138</td><td class="best">0.919</td></tr>
+              <tr class="ours"><td>LookAnything</td><td class="best">0.109</td><td class="best">0.942</td><td class="best">0.098</td><td class="best">0.941</td><td class="best">0.091</td><td>0.048</td><td>0.945</td><td class="best">0.094</td><td class="best">0.956</td><td class="best">0.130</td><td class="best">0.940</td><td class="best">0.771</td><td class="best">0.132</td><td class="best">0.927</td></tr>
             </tbody>
           </table>
         </div>
@@ -333,8 +333,8 @@
       <div class="container">
         <div class="section-head">
           <p class="eyebrow">05 / Real world</p>
-          <h2>The same model on a Unitree G1.</h2>
-          <p>These clips are outside the training domains. From the robot’s egocentric camera, LookAnything grounds the source head, marks whether that person is looking at the robot, and follows the gaze target while the camera stays still or moves.</p>
+          <h2>Deployment on a Unitree G1 robot.</h2>
+          <p>To evaluate out-of-domain generalization, we deploy the model in real-world physical environments. From the robot’s egocentric perspective, LookAnything accurately grounds the source person, reliably recognizes social gaze signals, and precisely tracks gaze targets under both static and moving perspectives.</p>
         </div>
 
         <div data-switcher>
